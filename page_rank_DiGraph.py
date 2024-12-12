@@ -46,6 +46,7 @@ def distribution_page_rank(graph, args):
     """Probabilistic PageRank estimation"""
     return nx.pagerank(graph, max_iter=args.steps)
    # Delegating to NetworkX's built-in method is efficient and reliable.
+
 parser = argparse.ArgumentParser(description="Estimates page ranks from link information")
 parser.add_argument('datafile', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="Textfile of links among web pages as URL tuples")
 parser.add_argument('-m', '--method', choices=('stochastic', 'distribution'), default='stochastic', help="selected page rank algorithm")
