@@ -1,9 +1,9 @@
-import sys
-import time
 import argparse
 import random
+import sys
+import time
 from collections import defaultdict
-
+from progress import Progress
 
 def load_graph(args):
     """Load graph from text file

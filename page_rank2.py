@@ -6,7 +6,9 @@ import networkx as nx
 
 def load_graph(args):
     """Load graph from text file"""
+    # Load graph from DiGraph
     graph = nx.DiGraph()
+    # Read the graph structure line by line from the data file
     for line in args.datafile:
         line = line.strip()
         if line:
@@ -15,16 +17,21 @@ def load_graph(args):
     return graph
 
 def print_stats(graph):
+
     """Print number of nodes and edges in the given graph"""
+    # Load number of nodes and number of edges
     nodes = graph.number_of_nodes()
     edges = graph.number_of_edges()
     print(f"Graph contains {nodes} nodes and {edges} edges")
 
 def stochastic_page_rank(graph, args):
     """Stochastic PageRank estimation"""
+
     nodes = list(graph.nodes)
     hits = {node: 0 for node in nodes}
+    # This initializes hit counts for all nodes. Clear and efficient for this purpose
     for _ in range(args.repeats):
+        # Starting at a random node is standard for random walks
         current = random.choice(nodes)
         for _ in range(args.steps):
             hits[current] += 1
@@ -38,7 +45,7 @@ def stochastic_page_rank(graph, args):
 def distribution_page_rank(graph, args):
     """Probabilistic PageRank estimation"""
     return nx.pagerank(graph, max_iter=args.steps)
-
+   # Delegating to NetworkX's built-in method is efficient and reliable.
 parser = argparse.ArgumentParser(description="Estimates page ranks from link information")
 parser.add_argument('datafile', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="Textfile of links among web pages as URL tuples")
 parser.add_argument('-m', '--method', choices=('stochastic', 'distribution'), default='stochastic', help="selected page rank algorithm")
