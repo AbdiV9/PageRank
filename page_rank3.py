@@ -4,7 +4,6 @@ import argparse
 import numpy as np
 
 
-
 def load_graph(args):
     """Load graph as a transition probability matrix."""
     url_to_index = {}
