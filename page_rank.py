@@ -12,7 +12,7 @@ def load_graph(args):
     Returns:
     A dict mapling a URL (str) to a list of target URLs (str).
     """
-    # Initialize the graph as a dictionary
+    # Load the graph as a dictionary
     graph = defaultdict(list)
     # Read the graph structure line by line from the data file
     for line in args.datafile:

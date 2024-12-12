@@ -4,77 +4,47 @@ import sys
 import time
 import networkx as nx
 
-
 def load_graph(args):
-    """Load graph from text file
-    Parameters:
-    args -- arguments named tuple
-    Returns:
-    A dict mapling a URL (str) to a list of target URLs (str).
-    """
+    """Load graph from text file"""
     graph = nx.DiGraph()
     for line in args.datafile:
         line = line.strip()
         if line:
             node, target = line.split(' ', 1)
-
-            if node in graph:
-                graph.add_edge(node, target) # Add the target to the existing list
+            graph.add_edge(node, target)
     return graph
 
 def print_stats(graph):
     """Print number of nodes and edges in the given graph"""
-    graph.number_of_nodes()
-    graph.number_of_edges()
-    print(f"Graph contains {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges")
-
+    nodes = graph.number_of_nodes()
+    edges = graph.number_of_edges()
+    print(f"Graph contains {nodes} nodes and {edges} edges")
 
 def stochastic_page_rank(graph, args):
-    """Stochastic PageRank estimation
-    Parameters:
-    graph -- a graph object as returned by load_graph()
-    args -- arguments named tuple
-    Returns:
-    A dict that assigns each page its hit frequency
-    This function estimates the Page Rank by counting how frequently
-    a random walk that starts on a random node will after n_steps end
-    on each node of the given graph.
-    """
-
+    """Stochastic PageRank estimation"""
     nodes = list(graph.nodes)
-    hits = {node : 0 for node in nodes}
-    num_repeats = args.repeats
-    for _ in range(num_repeats):
+    hits = {node: 0 for node in nodes}
+    for _ in range(args.repeats):
         current = random.choice(nodes)
         for _ in range(args.steps):
-         hits[current] += 1
-         targets = list(graph.out_edges(current))
-        if targets:
-            current = random.choice(targets)
-        else:
-            current = random.choice(nodes)
-
+            hits[current] += 1
+            targets = list(graph.successors(current))
+            if targets:
+                current = random.choice(targets)
+            else:
+                current = random.choice(nodes)
+    return hits
 
 def distribution_page_rank(graph, args):
-    """Probabilistic PageRank estimation
-    Parameters:
-    graph -- a graph object as returned by load_graph()
-    args -- arguments named tuple
-    Returns:
-    A dict that assigns each page its probability to be reached
-    This function estimates the Page Rank by iteratively calculating
-    the probability that a random walker is currently on any node.
-    """
+    """Probabilistic PageRank estimation"""
     return nx.pagerank(graph, max_iter=args.steps)
 
-
 parser = argparse.ArgumentParser(description="Estimates page ranks from link information")
-parser.add_argument('datafile', nargs='?', type=argparse.FileType('r'),default=sys.stdin,help="Textfile of links among web pages as URL tuples")
-parser.add_argument('-m', '--method', choices=('stochastic', 'distribution'),default='stochastic',help="selected page rank algorithm")
+parser.add_argument('datafile', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="Textfile of links among web pages as URL tuples")
+parser.add_argument('-m', '--method', choices=('stochastic', 'distribution'), default='stochastic', help="selected page rank algorithm")
 parser.add_argument('-r', '--repeats', type=int, default=1_000_000, help="number of repetitions")
 parser.add_argument('-s', '--steps', type=int, default=100, help="number of steps a walker takes")
 parser.add_argument('-n', '--number', type=int, default=20, help="number of results shown")
-
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -84,10 +54,11 @@ if __name__ == '__main__':
     start = time.time()
     ranking = algorithm(graph, args)
     stop = time.time()
-    time = stop - start
+    elapsed_time = stop - start
     top = sorted(ranking.items(), key=lambda item: item[1], reverse=True)
     sys.stderr.write(f"Top {args.number} pages:\n")
-    print('\n'.join(f'{100*v:.2f}\t{k}' for k,v in top[:args.number]))
-    sys.stderr.write(f"Calculation took {time:.2f} seconds.\n")
+    print('\n'.join(f'{100*v:.2f}\t{k}' for k, v in top[:args.number]))
+    sys.stderr.write(f"Calculation took {elapsed_time:.2f} seconds.\n")
+
 
 
